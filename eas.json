@@ -1,0 +1,50 @@
+workflows:
+  expo-test:
+    name: Expo Test Build
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+
+    scripts:
+      - name: Check files
+        script: |
+          echo "Aktueller Ordner:"
+          pwd
+          echo "Dateien:"
+          ls -la
+          echo "package.json Inhalt Anfang:"
+          head -20 package.json
+
+      - name: Install dependencies
+        script: |
+          npm install
+
+      - name: Test Expo export
+        script: |
+          npx expo export
+
+    artifacts:
+      - dist/**
+
+  expo-ios-eas:
+    name: Expo iOS EAS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          npm install -g eas-cli
+
+      - name: Expo doctor
+        script: |
+          npx expo-doctor || true
+
+      - name: Start EAS iOS build
+        script: |
+          echo "Für diesen Workflow brauchst du später EXPO_TOKEN als Environment Variable."
+          eas build -p ios --profile preview --non-interactive
+
+    artifacts:
+      - "*.ipa"
+      - build/**/*.ipa
